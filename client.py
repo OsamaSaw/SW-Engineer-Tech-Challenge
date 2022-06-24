@@ -19,7 +19,7 @@ class SeriesCollector:
         Args:
             first_dataset (Dataset): The first dataset or the regarding series received from the modality.
         """
-        print("SeriesCollector Started 1")
+        # print("SeriesCollector Started 1")
         self.series_instance_uid = first_dataset.SeriesInstanceUID
         self.series: list[Dataset] = [first_dataset]
         self.last_update_time = time.time()
@@ -27,7 +27,7 @@ class SeriesCollector:
         # print(f"Data Recived : {self.series[0].SeriesInstanceUID}\n")
 
     def add_instance(self, dataset: Dataset) -> bool:
-        print("add_instance 2 ")
+        # print("add_instance 2 ")
         """Add a dataset to the series collected by this Series Collector if it has the correct Series UID.
 
         Args:
@@ -55,14 +55,14 @@ class SeriesDispatcher:
     def __init__(self) -> None:
         """Initialize the Series Dispatcher.
         """
-        print("SeriesDispatcher Started 3")
+        # print("SeriesDispatcher Started 3")
         self.loop: asyncio.AbstractEventLoop
         self.modality_scp = ModalityStoreSCP()
         self.series_collector = None
         self.maximum_wait_time = 1
 
     async def main(self) -> None:
-        print("Main Function 4")
+        # print("Main Function 4")
         """An infinitely running method used as hook for the asyncio event loop.
         Keeps the event loop alive whether or not datasets are received from the modality and prints a message
         Regularly when no datasets are received.
@@ -79,7 +79,7 @@ class SeriesDispatcher:
             await asyncio.sleep(0.2)
 
     async def run_series_collectors(self) -> None:
-        print("run_series_collectors 5")
+        # print("run_series_collectors 5")
         """Runs the collection of datasets, which results in the Series Collector being filled.
         """
         # TODO: Get the data from the SCP and start dispatching
@@ -93,7 +93,7 @@ class SeriesDispatcher:
                 time.sleep(0.2)
 
     async def dispatch_series_collector(self) -> None:
-        print("dispatch_series_collector 6")
+        # print("dispatch_series_collector 6")
         """Tries to dispatch a Series Collector, i.e. to finish its dataset collection and scheduling of further
         methods to extract the desired information.
         """
