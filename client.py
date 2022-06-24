@@ -1,4 +1,5 @@
 import asyncio
+import json
 import time
 from pydicom import Dataset
 from scp import ModalityStoreSCP
@@ -18,15 +19,15 @@ class SeriesCollector:
         Args:
             first_dataset (Dataset): The first dataset or the regarding series received from the modality.
         """
-        print("SeriesCollector Started")
+        # print("SeriesCollector Started")
         self.series_instance_uid = first_dataset.SeriesInstanceUID
         self.series: list[Dataset] = [first_dataset]
         self.last_update_time = time.time()
         self.dispatch_started = False
-        print(f"Data Recived : {self.series[0].SeriesInstanceUID}\n")
+        # print(f"Data Recived : {self.series[0].SeriesInstanceUID}\n")
 
     def add_instance(self, dataset: Dataset) -> bool:
-        print("add_instance")
+        # print("add_instance")
         """Add a dataset to the series collected by this Series Collector if it has the correct Series UID.
 
         Args:
@@ -54,14 +55,14 @@ class SeriesDispatcher:
     def __init__(self) -> None:
         """Initialize the Series Dispatcher.
         """
-        print("SeriesDispatcher Started")
+        # print("SeriesDispatcher Started")
         self.loop: asyncio.AbstractEventLoop
         self.modality_scp = ModalityStoreSCP()
         self.series_collector = None
         self.maximum_wait_time = 1
 
     async def main(self) -> None:
-        print("Main Function")
+        # print("Main Function")
         """An infinitely running method used as hook for the asyncio event loop.
         Keeps the event loop alive whether or not datasets are received from the modality and prints a message
         Regularly when no datasets are received.
@@ -78,7 +79,7 @@ class SeriesDispatcher:
             await asyncio.sleep(0.2)
 
     async def run_series_collectors(self) -> None:
-        print("run_series_collectors")
+        # print("run_series_collectors")
         """Runs the collection of datasets, which results in the Series Collector being filled.
         """
         # TODO: Get the data from the SCP and start dispatching
@@ -92,7 +93,7 @@ class SeriesDispatcher:
                 time.sleep(0.2)
 
     async def dispatch_series_collector(self) -> None:
-        print("dispatch_series_collector")
+        # print("dispatch_series_collector")
         """Tries to dispatch a Series Collector, i.e. to finish its dataset collection and scheduling of further
         methods to extract the desired information.
         """
@@ -104,20 +105,21 @@ class SeriesDispatcher:
         if self.series_collector:
             if self.old_to_be_moved():
                 data = self.compact_data_to_json()
-                print(data)
+                # print(data)
                 await self.send_put_req(data)
                 # todo: Send data to the server to be stored in the database
                 self.series_collector = None
 
     async def send_put_req(self, data):
-        res = requests.put("http://localhost:5000", data={'key':'value'})
+        jdata = json.dumps(data)
+        res = requests.post("http://localhost:5000", headers={'Content-Type': 'application/json'}, data=jdata)
         print("Request sent to server...")
         print(res.json())
 
     def compact_data_to_json(self):
         data = {
             'SeriesInstanceUID': self.series_collector.series[0].StudyInstanceUID,
-            'PatientName': self.series_collector.series[0].PatientName,
+            'PatientName': str(self.series_collector.series[0].PatientName),
             'PatientID': self.series_collector.series[0].PatientID,
             'StudyInstanceUID': self.series_collector.series[0].StudyInstanceUID,
             'NumberOfInstances': len(self.series_collector.series)

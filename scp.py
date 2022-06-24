@@ -7,7 +7,7 @@ debug_logger()
 
 class ModalityStoreSCP:
     def __init__(self) -> None:
-        print("ModalityStoreSCP Started")
+        # print("ModalityStoreSCP Started")
         self.ae = AE(ae_title=b'STORESCP')
         self.scp = None
         self._configure_ae()
@@ -23,7 +23,7 @@ class ModalityStoreSCP:
         print("SCP Server started")
 
     def handle_store(self, event: events.Event) -> int:
-        print("handle_store")
+        # print("handle_store")
         """Callable handler function used to handle a C-STORE event.
 
         Args:
